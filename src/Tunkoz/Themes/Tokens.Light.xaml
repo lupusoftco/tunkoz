@@ -1,45 +1,56 @@
+<!-- Generated from the Claude Design artifact (CardStates, CardContext, TrayMenu, Settings, About). -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Surface colors -->
-    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Base" Color="#F3F3F8"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Card" Color="#FBFBFD"/>
-    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Row" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Inset" Color="#F0F0F6"/>
-
-    <!-- Stroke colors -->
     <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Card" Color="#DCDDE8"/>
-    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Control" Color="#CFD0DE"/>
-
-    <!-- Text colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Inset" Color="#F0F0F6"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Inset" Color="#E3E4EE"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Window" Color="#F7F7FB"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Window" Color="#D5D6E2"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Row" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Row" Color="#E3E4EE"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Text.Primary" Color="#14162B"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Text.Secondary" Color="#555874"/>
-
-    <!-- Accent colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Text.Link" Color="#3D43B8"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Accent.Fill" Color="#1B1F45"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Accent.OnFill" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="Tunkoz.Brush.Brand.Glow" Color="#E39B17"/>
-
-    <!-- Info colors -->
-    <SolidColorBrush x:Key="Tunkoz.Brush.Info.Foreground" Color="#3D43B8"/>
-    <SolidColorBrush x:Key="Tunkoz.Brush.Info.Background" Color="#E6E7FA"/>
-
-    <!-- Warning colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Secondary.Fill" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Secondary.Stroke" Color="#CFD0DE"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Secondary.Foreground" Color="#14162B"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Control.Fill" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Control.Stroke" Color="#CFD0DE"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Ghost.Hover" Color="#0F14162B"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Info.Background" Color="#E6E7FA"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Info.Foreground" Color="#3D43B8"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Warning.Background" Color="#FCEBC2"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Warning.Foreground" Color="#8A5600"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Danger.Background" Color="#FADADD"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Tile.Danger.Foreground" Color="#B4232E"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Background" Color="#FFF4D6"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Stroke" Color="#E3B24A"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Foreground" Color="#5C3A00"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Body" Color="#5C3A00"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Icon" Color="#8A5600"/>
-
-    <!-- Danger/Blocked colors -->
     <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Background" Color="#FDECEC"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Stroke" Color="#E8A3A8"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Foreground" Color="#8E1520"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Body" Color="#8E1520"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Icon" Color="#B4232E"/>
-
-    <!-- Success colors -->
     <SolidColorBrush x:Key="Tunkoz.Brush.Success.Background" Color="#E5F5EC"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Success.Stroke" Color="#8CCBA6"/>
     <SolidColorBrush x:Key="Tunkoz.Brush.Success.Foreground" Color="#17663A"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Brand.Glow" Color="#E39B17"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Brand.GlowFill" Color="#14E39B17"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Progress.Track" Color="#0F14162B"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Background" Color="#F9F9F9"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Stroke" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Foreground" Color="#1B1B1B"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Secondary" Color="#5C5C5C"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Hover" Color="#0D000000"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Separator" Color="#E5E5E5"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Menu.Dot" Color="#C98400"/>
 
+    <DropShadowEffect x:Key="Tunkoz.Shadow.Card" BlurRadius="24" ShadowDepth="8" Direction="270" Opacity="0.16" Color="#14162B"/>
+    <DropShadowEffect x:Key="Tunkoz.Shadow.Menu" BlurRadius="16" ShadowDepth="4" Direction="270" Opacity="0.14" Color="#000000"/>
 </ResourceDictionary>

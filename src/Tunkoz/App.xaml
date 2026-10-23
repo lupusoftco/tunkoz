@@ -5,8 +5,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Themes/Metrics.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/Themes/Tokens.Light.xaml"/>
+                <!-- ThemeService swaps this for Tokens.Light/Dark at startup and when Windows changes -->
+                <ResourceDictionary Source="pack://application:,,,/Themes/Tokens.Dark.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/Themes/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

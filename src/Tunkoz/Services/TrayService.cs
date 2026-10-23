@@ -1,109 +1,92 @@
-using System;
+using System.Windows;
 using System.Windows.Forms;
 using Tunkoz.Views;
+using Application = System.Windows.Application;
 
 namespace Tunkoz.Services;
 
-/// <summary>Owns the notification-area icon and its context menu. This is the app's only persistent UI.</summary>
-public class TrayService : IDisposable
+/// <summary>
+/// Owns the notification-area icon (design: monochrome eye, white on a dark taskbar, #1B1B1B on a light one)
+/// and opens the custom Windows 11-style tray menu on click.
+/// </summary>
+public sealed class TrayService : IDisposable
 {
-    private readonly QrDetectionPipeline _pipeline;
-    private readonly Action _openDebugConsole;
+    private readonly Action _openSettings;
+    private readonly Action _openAbout;
     private readonly Action _quit;
     private readonly NotifyIcon _notifyIcon;
-    private ToolStripMenuItem? _pauseItem;
+    private TrayMenuWindow? _menu;
     private bool _isPaused;
 
-    public TrayService(QrDetectionPipeline pipeline, Action openDebugConsole, Action quit)
+    public TrayService(Action openSettings, Action openAbout, Action quit)
     {
-        _pipeline = pipeline;
-        _openDebugConsole = openDebugConsole;
+        _openSettings = openSettings;
+        _openAbout = openAbout;
         _quit = quit;
 
-        _notifyIcon = new NotifyIcon
+        _notifyIcon = new NotifyIcon { Visible = false };
+        _notifyIcon.MouseUp += (_, e) =>
         {
-            // Placeholder until the Claude Design icon set is wired in (Milestone 4)
-            Icon = System.Drawing.SystemIcons.Application,
-            Text = "Tünköz — Active",
-            Visible = true,
-            ContextMenuStrip = BuildContextMenu()
+            if (e.Button is MouseButtons.Right or MouseButtons.Left)
+                ShowMenu();
         };
-        _notifyIcon.DoubleClick += (_, _) => _openDebugConsole();
+
+        UpdateIcon();
+        _notifyIcon.Visible = true;
+
+        ThemeService.ThemeChanged += (_, _) => UpdateIcon();
+        Loc.Instance.LanguageChanged += (_, _) => UpdateIcon();
     }
 
-    public bool IsPaused => _isPaused;
+    public bool IsPaused
+    {
+        get => _isPaused;
+        set { _isPaused = value; UpdateIcon(); }
+    }
 
     public void ShowStartedNotification()
     {
-        _notifyIcon.ShowBalloonTip(
-            3000,
-            "Tünköz is running",
-            "Right-click any QR code on screen. Tünköz lives in the system tray.",
-            ToolTipIcon.Info);
+        _notifyIcon.ShowBalloonTip(3000, Loc.T("Tray.Started.Title"), Loc.T("Tray.Started.Body"), ToolTipIcon.None);
     }
 
-    public void Pause()
+    private void ShowMenu()
     {
-        if (_isPaused)
-            return;
-
-        _isPaused = true;
-        _pipeline.Stop();
-        _notifyIcon.Text = "Tünköz — Paused";
-        if (_pauseItem != null)
-            _pauseItem.Text = "Resume";
-    }
-
-    public void Resume()
-    {
-        if (!_isPaused)
-            return;
-
-        _isPaused = false;
-        _pipeline.Start();
-        _notifyIcon.Text = "Tünköz — Active";
-        if (_pauseItem != null)
-            _pauseItem.Text = "Pause";
-    }
-
-    private ContextMenuStrip BuildContextMenu()
-    {
-        var menu = new ContextMenuStrip();
-
-        _pauseItem = new ToolStripMenuItem("Pause");
-        _pauseItem.Click += (_, _) =>
+        if (_menu != null)
         {
-            if (_isPaused) Resume();
-            else Pause();
-        };
-        menu.Items.Add(_pauseItem);
+            _menu.Close();
+            return;
+        }
 
-        menu.Items.Add(new ToolStripSeparator());
+        var pos = Cursor.Position; // physical px
+        _menu = new TrayMenuWindow(_openSettings, _openAbout, _quit);
+        _menu.Closed += (_, _) => _menu = null;
+        _menu.ShowAt(pos.X, pos.Y);
+    }
 
-        var settingsItem = new ToolStripMenuItem("Settings");
-        settingsItem.Click += (_, _) => new SettingsWindow().Show();
-        menu.Items.Add(settingsItem);
+    private void UpdateIcon()
+    {
+        var state = _isPaused ? "paused" : "active";
+        var variant = ThemeService.TaskbarUsesDark ? "dark" : "light";
+        var old = _notifyIcon.Icon;
+        _notifyIcon.Icon = LoadIcon($"tray-{state}-{variant}.ico");
+        old?.Dispose();
+        _notifyIcon.Text = Loc.T(_isPaused ? "Tray.Tooltip.Paused" : "Tray.Tooltip.Active");
+    }
 
-        var debugItem = new ToolStripMenuItem("Debug console");
-        debugItem.Click += (_, _) => _openDebugConsole();
-        menu.Items.Add(debugItem);
-
-        var aboutItem = new ToolStripMenuItem("About");
-        aboutItem.Click += (_, _) => new AboutWindow().Show();
-        menu.Items.Add(aboutItem);
-
-        menu.Items.Add(new ToolStripSeparator());
-
-        var quitItem = new ToolStripMenuItem("Quit");
-        quitItem.Click += (_, _) => _quit();
-        menu.Items.Add(quitItem);
-
-        return menu;
+    private static System.Drawing.Icon LoadIcon(string name)
+    {
+        var info = Application.GetResourceStream(new Uri($"pack://application:,,,/Assets/{name}"));
+        if (info == null)
+            return (System.Drawing.Icon)System.Drawing.SystemIcons.Application.Clone();
+        using var stream = info.Stream;
+        return new System.Drawing.Icon(stream, SystemInformation.SmallIconSize);
     }
 
     public void Dispose()
     {
+        _menu?.Close();
         _notifyIcon.Visible = false;
+        _notifyIcon.Icon?.Dispose();
         _notifyIcon.Dispose();
     }
 }

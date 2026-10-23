@@ -1,17 +1,19 @@
 <Window x:Class="Tunkoz.Views.HighlightOverlay"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="QR Highlight"
+        Title="Tünköz highlight"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         Topmost="True"
         ShowInTaskbar="False"
+        ShowActivated="False"
         ResizeMode="NoResize"
         IsHitTestVisible="False">
-
-    <Border x:Name="HighlightBorder"
-            BorderBrush="{DynamicResource Tunkoz.Brush.Brand.Glow}"
-            BorderThickness="2"
-            CornerRadius="4"/>
+    <!-- Amber finder-corner brackets with a faint fill, as in the CardContext mockup -->
+    <Grid>
+        <Border Margin="4" CornerRadius="4" Background="{DynamicResource Tunkoz.Brush.Brand.GlowFill}"/>
+        <Path x:Name="Brackets" Stroke="{DynamicResource Tunkoz.Brush.Brand.Glow}" StrokeThickness="3"
+              StrokeStartLineCap="Square" StrokeEndLineCap="Square"/>
+    </Grid>
 </Window>

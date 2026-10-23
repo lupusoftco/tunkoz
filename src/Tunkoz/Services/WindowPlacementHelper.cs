@@ -75,11 +75,14 @@ public static class WindowPlacementHelper
             : 1.0;
     }
 
-    public static void PositionWindowSmartly(Window window, int cursorX, int cursorY, CoreRect? qrBounds)
+    /// <param name="shadowMarginDip">Transparent margin around the visible card (for its shadow);
+    /// placement uses the visible card's edges.</param>
+    public static void PositionWindowSmartly(Window window, int cursorX, int cursorY, CoreRect? qrBounds, double shadowMarginDip = 0)
     {
         var scale = GetDpiScale();
-        var widthPx = (window.ActualWidth > 0 ? window.ActualWidth : DefaultWidthDip) * scale;
-        var heightPx = (window.ActualHeight > 0 ? window.ActualHeight : DefaultHeightDip) * scale;
+        var marginPx = shadowMarginDip * scale;
+        var widthPx = ((window.ActualWidth > 0 ? window.ActualWidth : DefaultWidthDip) - 2 * shadowMarginDip) * scale;
+        var heightPx = ((window.ActualHeight > 0 ? window.ActualHeight : DefaultHeightDip) - 2 * shadowMarginDip) * scale;
         var work = GetWorkArea(cursorX, cursorY);
 
         double left, top;
@@ -124,8 +127,8 @@ public static class WindowPlacementHelper
             top = Math.Max(work.Top, top);
         }
 
-        window.Left = left / scale;
-        window.Top = top / scale;
+        window.Left = (left - marginPx) / scale;
+        window.Top = (top - marginPx) / scale;
     }
 
     /// <summary>Sets a window to exactly cover a physical-pixel rectangle.</summary>
@@ -145,6 +148,13 @@ public static class WindowPlacementHelper
         if (hwnd != IntPtr.Zero && IsWindowVisible(hwnd) && GetWindowRect(hwnd, out var rect))
             return rect;
         return null;
+    }
+
+    /// <summary>Work area (physical px) of the monitor containing the point.</summary>
+    public static System.Drawing.Rectangle GetWorkAreaPx(int x, int y)
+    {
+        var r = GetWorkArea(x, y);
+        return System.Drawing.Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom);
     }
 
     private static RECT GetWorkArea(int x, int y)

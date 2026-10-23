@@ -6,7 +6,9 @@ using Tunkoz.Views;
 namespace Tunkoz;
 
 /// <summary>
-/// Tray-only application: no main window. The tray icon is the only visible UI until a QR is right-clicked.
+/// Tray-only application: no main window. The tray icon is the only persistent UI;
+/// the result card appears when a QR code is right-clicked.
+/// Run with --debug to also open the detection console (timings, decoded payloads).
 /// </summary>
 public partial class App : Application
 {
@@ -16,6 +18,8 @@ public partial class App : Application
     private QrDetectionPipeline? _pipeline;
     private TrayService? _trayService;
     private DebugConsoleWindow? _debugConsole;
+    private SettingsWindow? _settings;
+    private AboutWindow? _about;
     private CardWindow? _currentCard;
     private bool _shuttingDown;
 
@@ -33,13 +37,19 @@ public partial class App : Application
             return;
         }
 
+        SettingsStore.Load();
+        Loc.Instance.Language = SettingsStore.EffectiveLanguage;
+        ThemeService.Initialize();
+
         _pipeline = new QrDetectionPipeline();
         _pipeline.QrDetected += OnQrDetected;
 
-        _trayService = new TrayService(_pipeline, OpenDebugConsole, () => Shutdown());
+        _trayService = new TrayService(OpenSettings, OpenAbout, () => Shutdown());
         _pipeline.Start();
-
         _trayService.ShowStartedNotification();
+
+        if (e.Args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
+            OpenDebugConsole();
     }
 
     private void OnQrDetected(object? sender, QrDetectionResult result)
@@ -72,12 +82,38 @@ public partial class App : Application
         });
     }
 
+    private void OpenSettings()
+    {
+        if (_settings != null)
+        {
+            _settings.Activate();
+            return;
+        }
+        _settings = new SettingsWindow();
+        _settings.Closed += (_, _) => _settings = null;
+        _settings.Show();
+        _settings.Activate();
+    }
+
+    private void OpenAbout()
+    {
+        if (_about != null)
+        {
+            _about.Activate();
+            return;
+        }
+        _about = new AboutWindow();
+        _about.Closed += (_, _) => _about = null;
+        _about.Show();
+        _about.Activate();
+    }
+
     private void OpenDebugConsole()
     {
         if (_pipeline == null)
             return;
 
-        if (_debugConsole?.IsVisible == true)
+        if (_debugConsole != null)
         {
             _debugConsole.Activate();
             return;
@@ -93,6 +129,8 @@ public partial class App : Application
         _shuttingDown = true;
         _currentCard?.Close();
         _debugConsole?.Close();
+        _settings?.Close();
+        _about?.Close();
         _pipeline?.Dispose();
         _trayService?.Dispose();
 

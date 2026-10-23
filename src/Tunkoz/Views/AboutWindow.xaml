@@ -1,122 +1,62 @@
 <Window x:Class="Tunkoz.Views.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About Tünköz"
-        Width="400"
-        Height="500"
+        xmlns:svc="clr-namespace:Tunkoz.Services"
+        Title="{Binding [About.WindowTitle], Source={x:Static svc:Loc.Instance}}"
+        Icon="pack://application:,,,/Assets/Tunkoz.ico"
+        Width="440" SizeToContent="Height"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource Tunkoz.Brush.Surface.Base}"
-        ResizeMode="NoResize">
+        UseLayoutRounding="True"
+        Background="{DynamicResource Tunkoz.Brush.Surface.Window}"
+        TextElement.Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+        TextElement.FontFamily="{StaticResource Tunkoz.Font.UI}">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="32" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
-    <DockPanel LastChildFill="True">
-        <!-- Close Button -->
-        <Button DockPanel.Dock="Top"
-                HorizontalAlignment="Right"
-                Margin="16"
-                Width="32"
-                Height="32"
-                Style="{StaticResource TunkozIconButton}"
-                Click="OnCloseClick"
-                Content="✕"
-                FontSize="16"/>
+    <StackPanel>
+        <Grid Height="32">
+            <TextBlock FontSize="12" Margin="14,0,0,0" VerticalAlignment="Center"
+                       Text="{Binding [About.WindowTitle], Source={x:Static svc:Loc.Instance}}"/>
+            <Button Style="{StaticResource TunkozCaptionButton}" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="OnCloseClick" AutomationProperties.Name="{Binding [About.Close], Source={x:Static svc:Loc.Instance}}">
+                <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1" Width="10" Height="10"/>
+            </Button>
+        </Grid>
 
-        <!-- Content -->
-        <ScrollViewer DockPanel.Dock="Top"
-                      VerticalScrollBarVisibility="Auto"
-                      Padding="24">
-            <StackPanel>
-                <!-- Logo/Title Area -->
-                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <TextBlock Text="👁"
-                               FontSize="48"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozTitleLarge}"
-                               Text="Tünköz"
-                               HorizontalAlignment="Center"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozCaption}"
-                               Text="Version 0.1.0"
-                               HorizontalAlignment="Center"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
-                </StackPanel>
-
-                <!-- Name Story -->
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
-                               Text="The Name"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozBody}"
-                               Text="Tünköz comes from Old Turkic: tün (night) + köz (eye). It's the eye that sees in the dark—just like this app, which reveals hidden QR codes anywhere on your screen."
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
-                </StackPanel>
-
-                <!-- Description -->
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
-                               Text="About"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozBody}"
-                               Text="Right-click any QR code on Windows and instantly see the decoded content with one-click actions. No hokey region select, no waiting—just what the code contains, instantly."
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
-                </StackPanel>
-
-                <!-- Features -->
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
-                               Text="Features"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozBody}"
-                               Text="✓ Works offline, no telemetry&#10;✓ Detects 8 payload types&#10;✓ Safety warnings for suspicious links&#10;✓ Multi-DPI and multi-monitor support"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
-                </StackPanel>
-
-                <!-- Links -->
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
-                               Text="Links"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozBody}"
-                               Text="GitHub"
-                               Cursor="Hand"
-                               Foreground="{DynamicResource Tunkoz.Brush.Accent.Fill}"
-                               MouseDown="OnGitHubClick"/>
-                </StackPanel>
-
-                <!-- License -->
-                <StackPanel>
-                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
-                               Text="License"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Style="{StaticResource TunkozCaption}"
-                               Text="MIT License - Free and open source"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
-                </StackPanel>
+        <StackPanel Margin="36,28,36,28" HorizontalAlignment="Stretch">
+            <Image Source="pack://application:,,,/Assets/logo-128.png" Width="88" Height="88" HorizontalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
+            <TextBlock Style="{StaticResource TunkozDisplayText}" Text="Tünköz" FontSize="34" HorizontalAlignment="Center" Margin="0,14,0,0"/>
+            <TextBlock x:Name="VersionText" FontSize="13" HorizontalAlignment="Center" Margin="0,4,0,0"
+                       Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+            <TextBlock FontSize="14" LineHeight="21" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320" Margin="0,14,0,0"
+                       HorizontalAlignment="Center" Text="{Binding [About.Story], Source={x:Static svc:Loc.Instance}}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                <TextBlock FontSize="13">
+                    <Hyperlink NavigateUri="https://github.com/lupusoftco/tunkoz" RequestNavigate="OnLink"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Link}">github.com/lupusoftco/tunkoz</Hyperlink>
+                </TextBlock>
+                <TextBlock FontSize="13" Text="·" Margin="16,0" Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                <TextBlock FontSize="13">
+                    <Hyperlink NavigateUri="https://github.com/lupusoftco/tunkoz/blob/main/LICENSE" RequestNavigate="OnLink"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Link}">
+                        <Run Text="{Binding [About.License], Source={x:Static svc:Loc.Instance}, Mode=OneWay}"/>
+                    </Hyperlink>
+                </TextBlock>
             </StackPanel>
-        </ScrollViewer>
-
-        <!-- Footer -->
-        <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource Tunkoz.Brush.Surface.Card}"
-                BorderBrush="{DynamicResource Tunkoz.Brush.Stroke.Card}"
-                BorderThickness="0,1,0,0"
-                Padding="16">
-            <Button HorizontalAlignment="Right"
-                    Style="{StaticResource TunkozPrimaryButton}"
-                    Content="Close"
-                    Click="OnCloseClick"
-                    Padding="16,8,16,8"
-                    MinWidth="80"/>
-        </Border>
-    </DockPanel>
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Style="{StaticResource TunkozSecondaryButton}" Click="OnGitHubClick"
+                        Content="{Binding [About.OpenGitHub], Source={x:Static svc:Loc.Instance}}"/>
+                <Button Grid.Column="2" Style="{StaticResource TunkozPrimaryButton}" Click="OnCloseClick"
+                        Content="{Binding [About.Close], Source={x:Static svc:Loc.Instance}}"/>
+            </Grid>
+        </StackPanel>
+    </StackPanel>
 </Window>

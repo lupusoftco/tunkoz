@@ -14,8 +14,12 @@
     <GenerateTargetFrameworkMonikerAttribute>false</GenerateTargetFrameworkMonikerAttribute>
     <AssemblyName>Tunkoz</AssemblyName>
     <RootNamespace>Tunkoz</RootNamespace>
-    <Version>0.1.1</Version>
-    <Authors>Tünköz Contributors</Authors>
+    <Version>0.2.0</Version>
+    <Authors>Lupusoft</Authors>
+    <Company>Lupusoft</Company>
+    <Product>Tünköz</Product>
+    <Copyright>© Lupusoft</Copyright>
+    <ApplicationIcon>Assets\Tunkoz.ico</ApplicationIcon>
     <Description>Right-click any QR code on Windows</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/lupusoftco/tunkoz</RepositoryUrl>
@@ -24,6 +28,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tunkoz.Core\Tunkoz.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Tunkoz.ico" />
+    <Resource Include="Assets\logo-128.png" />
+    <Resource Include="Assets\tray-*.ico" />
+    <Resource Include="Assets\Fonts\ChakraPetch-SemiBold.ttf" />
   </ItemGroup>
 
   <ItemGroup>

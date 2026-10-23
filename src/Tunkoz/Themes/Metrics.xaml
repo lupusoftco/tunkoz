@@ -31,9 +31,9 @@
     <Thickness x:Key="Tunkoz.Row.Padding">20,0,20,0</Thickness>
 
     <!-- Typography -->
-    <FontFamily x:Key="Tunkoz.Font.UI">Segoe UI Variable Text, Segoe UI, sans-serif</FontFamily>
-    <FontFamily x:Key="Tunkoz.Font.Mono">Cascadia Mono, Consolas, monospace</FontFamily>
-    <FontFamily x:Key="Tunkoz.Font.Display">Chakra Petch, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Tunkoz.Font.UI">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="Tunkoz.Font.Mono">Cascadia Mono, Consolas</FontFamily>
+    <FontFamily x:Key="Tunkoz.Font.Display">pack://application:,,,/Assets/Fonts/#Chakra Petch, Segoe UI</FontFamily>
 
     <!-- Font sizes -->
     <sys:Double x:Key="Tunkoz.FontSize.Display">40</sys:Double>

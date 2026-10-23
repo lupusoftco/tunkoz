@@ -12,7 +12,7 @@ public class PayloadParser
         return raw.ToUpperInvariant() switch
         {
             var s when s.StartsWith("WIFI:") => ParseWiFi(raw),
-            var s when s.StartsWith("BEGIN:VCARD") || s.StartsWith("BEGIN:MECARD") => ParseVCard(raw),
+            var s when s.StartsWith("BEGIN:VCARD") || s.StartsWith("MECARD:") => ParseVCard(raw),
             var s when s.StartsWith("TEL:") => ParseTel(raw),
             var s when s.StartsWith("MAILTO:") => ParseMailto(raw),
             var s when s.StartsWith("SMSTO:") => ParseSms(raw),
@@ -70,13 +70,17 @@ public class PayloadParser
     private Payload ParseWiFi(string raw)
     {
         var metadata = new Dictionary<string, string>();
-        var match = Regex.Match(raw, @"WIFI:T:([^;]*);S:([^;]*);P:([^;]*);?");
-
-        if (match.Success)
+        // Fields (T, S, P, H) may appear in any order; ';' ',' ':' and '\\' can be escaped with '\\'.
+        foreach (Match m in Regex.Matches(raw.Substring(5), @"([A-Za-z]):((?:\\.|[^;])*);?"))
         {
-            metadata["type"] = UnescapeWiFi(match.Groups[1].Value);
-            metadata["ssid"] = UnescapeWiFi(match.Groups[2].Value);
-            metadata["password"] = UnescapeWiFi(match.Groups[3].Value);
+            var value = UnescapeWiFi(m.Groups[2].Value);
+            switch (char.ToUpperInvariant(m.Groups[1].Value[0]))
+            {
+                case 'T': metadata["type"] = value; break;
+                case 'S': metadata["ssid"] = value; break;
+                case 'P': metadata["password"] = value; break;
+                case 'H': metadata["hidden"] = value; break;
+            }
         }
 
         return new Payload

@@ -1,0 +1,72 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Corner Radius (4px grid) -->
+    <CornerRadius x:Key="Tunkoz.Radius.Control">4</CornerRadius>
+    <CornerRadius x:Key="Tunkoz.Radius.Inset">6</CornerRadius>
+    <CornerRadius x:Key="Tunkoz.Radius.Surface">8</CornerRadius>
+
+    <!-- Spacing (4px grid) -->
+    <sys:Double x:Key="Tunkoz.Space.1">4</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.2">8</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.3">12</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.3.5">14</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.4">16</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.5">20</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.6">24</sys:Double>
+    <sys:Double x:Key="Tunkoz.Space.10">40</sys:Double>
+
+    <!-- Sizes -->
+    <sys:Double x:Key="Tunkoz.Card.Width">336</sys:Double>
+    <sys:Double x:Key="Tunkoz.Button.Height">36</sys:Double>
+    <sys:Double x:Key="Tunkoz.IconButton.Size">32</sys:Double>
+    <sys:Double x:Key="Tunkoz.Row.Height">64</sys:Double>
+    <sys:Double x:Key="Tunkoz.MenuItem.Height">36</sys:Double>
+
+    <!-- Padding / Margin -->
+    <Thickness x:Key="Tunkoz.Card.Padding">16</Thickness>
+    <Thickness x:Key="Tunkoz.Card.Margin">0</Thickness>
+    <Thickness x:Key="Tunkoz.Button.Padding">0,8,0,8</Thickness>
+    <Thickness x:Key="Tunkoz.Row.Padding">20,0,20,0</Thickness>
+
+    <!-- Typography -->
+    <FontFamily x:Key="Tunkoz.Font.UI">Segoe UI Variable Text, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="Tunkoz.Font.Mono">Cascadia Mono, Consolas, monospace</FontFamily>
+    <FontFamily x:Key="Tunkoz.Font.Display">Chakra Petch, Segoe UI, sans-serif</FontFamily>
+
+    <!-- Font sizes -->
+    <sys:Double x:Key="Tunkoz.FontSize.Display">40</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.TitleLarge">28</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.Value">22</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.BodyStrong">14</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.Body">14</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.Banner">13</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.Caption">12</sys:Double>
+    <sys:Double x:Key="Tunkoz.FontSize.Mono">12</sys:Double>
+
+    <!-- Line heights -->
+    <sys:Double x:Key="Tunkoz.LineHeight.Display">1</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.TitleLarge">1.286</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.Value">1.27</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.BodyStrong">1.43</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.Body">1.43</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.Banner">1.38</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.Caption">1.33</sys:Double>
+    <sys:Double x:Key="Tunkoz.LineHeight.Mono">1.33</sys:Double>
+
+    <!-- Shadows -->
+    <DropShadowEffect x:Key="Tunkoz.Shadow.Card.Light"
+                      BlurRadius="24"
+                      ShadowDepth="8"
+                      Direction="270"
+                      Opacity="0.14"
+                      Color="#14162B"/>
+    <DropShadowEffect x:Key="Tunkoz.Shadow.Card.Dark"
+                      BlurRadius="32"
+                      ShadowDepth="16"
+                      Direction="270"
+                      Opacity="0.45"
+                      Color="#000000"/>
+
+</ResourceDictionary>

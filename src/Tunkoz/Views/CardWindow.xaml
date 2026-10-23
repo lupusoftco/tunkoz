@@ -1,0 +1,141 @@
+<Window x:Class="Tunkoz.Views.CardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tünköz Result"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Width="336"
+        Height="Auto"
+        MaxHeight="600"
+        ResizeMode="NoResize"
+        Focusable="False"
+        SizeToContent="Height">
+
+    <Border Style="{StaticResource TunkozCard}"
+            Background="{DynamicResource Tunkoz.Brush.Surface.Card}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header with Icon and Content -->
+            <Grid Grid.Row="0" Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="TypeIcon"
+                           Grid.Column="0"
+                           FontSize="16"
+                           VerticalAlignment="Top"
+                           Text="🔗"/>
+
+                <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                    <TextBlock x:Name="DomainOrTitle"
+                               Style="{StaticResource TunkozBodyStrong}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               MaxHeight="48"/>
+                    <TextBlock x:Name="ContentPreview"
+                               Style="{StaticResource TunkozCaption}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"
+                               Margin="0,4,0,0"
+                               MaxHeight="72"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Warning Banner -->
+            <Border x:Name="WarningBanner"
+                    Grid.Row="1"
+                    Visibility="Collapsed"
+                    Margin="0,8,0,0"
+                    Padding="12,8,12,8"
+                    Background="{DynamicResource Tunkoz.Brush.Warning.Background}"
+                    BorderBrush="{DynamicResource Tunkoz.Brush.Warning.Stroke}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="⚠" FontSize="13" VerticalAlignment="Top"/>
+                    <TextBlock Grid.Column="2"
+                               x:Name="WarningText"
+                               Style="{StaticResource TunkozCaption}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Warning.Foreground}"/>
+                </Grid>
+            </Border>
+
+            <!-- Danger Banner -->
+            <Border x:Name="DangerBanner"
+                    Grid.Row="1"
+                    Visibility="Collapsed"
+                    Margin="0,8,0,0"
+                    Padding="12,8,12,8"
+                    Background="{DynamicResource Tunkoz.Brush.Danger.Background}"
+                    BorderBrush="{DynamicResource Tunkoz.Brush.Danger.Stroke}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🚫" FontSize="13" VerticalAlignment="Top"/>
+                    <TextBlock Grid.Column="2"
+                               x:Name="DangerText"
+                               Style="{StaticResource TunkozCaption}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Danger.Foreground}"/>
+                </Grid>
+            </Border>
+
+            <!-- Action Buttons Grid -->
+            <Grid Grid.Row="2" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="PrimaryActionButton"
+                        Grid.Column="0"
+                        Style="{StaticResource TunkozPrimaryButton}"
+                        Content="Open"
+                        Click="OnPrimaryAction"
+                        Padding="12,8,12,8"/>
+
+                <Button x:Name="SecondaryActionButton"
+                        Grid.Column="2"
+                        Style="{StaticResource TunkozSecondaryButton}"
+                        Content="Copy"
+                        Click="OnSecondaryAction"
+                        Padding="12,8,12,8"/>
+            </Grid>
+
+            <!-- Dismiss Progress Bar -->
+            <ProgressBar x:Name="DismissProgress"
+                         Grid.Row="3"
+                         Height="2"
+                         Background="Transparent"
+                         Foreground="{DynamicResource Tunkoz.Brush.Accent.Fill}"
+                         BorderThickness="0"
+                         Margin="-16,-12,-16,0"
+                         Value="100"
+                         IsIndeterminate="False"/>
+        </Grid>
+    </Border>
+</Window>

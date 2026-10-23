@@ -1,0 +1,122 @@
+<Window x:Class="Tunkoz.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About Tünköz"
+        Width="400"
+        Height="500"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Tunkoz.Brush.Surface.Base}"
+        ResizeMode="NoResize">
+
+    <DockPanel LastChildFill="True">
+        <!-- Close Button -->
+        <Button DockPanel.Dock="Top"
+                HorizontalAlignment="Right"
+                Margin="16"
+                Width="32"
+                Height="32"
+                Style="{StaticResource TunkozIconButton}"
+                Click="OnCloseClick"
+                Content="✕"
+                FontSize="16"/>
+
+        <!-- Content -->
+        <ScrollViewer DockPanel.Dock="Top"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="24">
+            <StackPanel>
+                <!-- Logo/Title Area -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <TextBlock Text="👁"
+                               FontSize="48"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozTitleLarge}"
+                               Text="Tünköz"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozCaption}"
+                               Text="Version 0.1.0"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                </StackPanel>
+
+                <!-- Name Story -->
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
+                               Text="The Name"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozBody}"
+                               Text="Tünköz comes from Old Turkic: tün (night) + köz (eye). It's the eye that sees in the dark—just like this app, which reveals hidden QR codes anywhere on your screen."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                </StackPanel>
+
+                <!-- Description -->
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
+                               Text="About"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozBody}"
+                               Text="Right-click any QR code on Windows and instantly see the decoded content with one-click actions. No hokey region select, no waiting—just what the code contains, instantly."
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                </StackPanel>
+
+                <!-- Features -->
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
+                               Text="Features"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozBody}"
+                               Text="✓ Works offline, no telemetry&#10;✓ Detects 8 payload types&#10;✓ Safety warnings for suspicious links&#10;✓ Multi-DPI and multi-monitor support"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                </StackPanel>
+
+                <!-- Links -->
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
+                               Text="Links"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozBody}"
+                               Text="GitHub"
+                               Cursor="Hand"
+                               Foreground="{DynamicResource Tunkoz.Brush.Accent.Fill}"
+                               MouseDown="OnGitHubClick"/>
+                </StackPanel>
+
+                <!-- License -->
+                <StackPanel>
+                    <TextBlock Style="{StaticResource TunkozBodyStrong}"
+                               Text="License"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Primary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Style="{StaticResource TunkozCaption}"
+                               Text="MIT License - Free and open source"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Tunkoz.Brush.Text.Secondary}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource Tunkoz.Brush.Surface.Card}"
+                BorderBrush="{DynamicResource Tunkoz.Brush.Stroke.Card}"
+                BorderThickness="0,1,0,0"
+                Padding="16">
+            <Button HorizontalAlignment="Right"
+                    Style="{StaticResource TunkozPrimaryButton}"
+                    Content="Close"
+                    Click="OnCloseClick"
+                    Padding="16,8,16,8"
+                    MinWidth="80"/>
+        </Border>
+    </DockPanel>
+</Window>

@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Surface colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Base" Color="#1C1E30"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Card" Color="#1F2238"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Row" Color="#252840"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Surface.Inset" Color="#171A2E"/>
+
+    <!-- Stroke colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Card" Color="#343859"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Stroke.Control" Color="#3B4068"/>
+
+    <!-- Text colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Text.Primary" Color="#ECEDF7"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Text.Secondary" Color="#A6A9C4"/>
+
+    <!-- Accent colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Accent.Fill" Color="#F5B83D"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Accent.OnFill" Color="#1A1305"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Brand.Glow" Color="#F5B83D"/>
+
+    <!-- Info colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Info.Foreground" Color="#B9BCFF"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Info.Background" Color="#2C3157"/>
+
+    <!-- Warning colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Background" Color="#3A2D10"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Stroke" Color="#7A5A16"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Foreground" Color="#FFD27A"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Warning.Icon" Color="#FFC857"/>
+
+    <!-- Danger/Blocked colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Background" Color="#3D161C"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Stroke" Color="#82303A"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Foreground" Color="#FFB3B9"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Danger.Icon" Color="#FF8F99"/>
+
+    <!-- Success colors -->
+    <SolidColorBrush x:Key="Tunkoz.Brush.Success.Background" Color="#1C3328"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Success.Stroke" Color="#2F6B4A"/>
+    <SolidColorBrush x:Key="Tunkoz.Brush.Success.Foreground" Color="#7BD7A0"/>
+
+</ResourceDictionary>

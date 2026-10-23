@@ -1,0 +1,17 @@
+<Window x:Class="Tunkoz.Views.HighlightOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="QR Highlight"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        IsHitTestVisible="False">
+
+    <Border x:Name="HighlightBorder"
+            BorderBrush="{DynamicResource Tunkoz.Brush.Brand.Glow}"
+            BorderThickness="2"
+            CornerRadius="4"/>
+</Window>

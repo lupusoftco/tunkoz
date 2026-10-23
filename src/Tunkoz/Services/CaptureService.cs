@@ -3,15 +3,47 @@ using System.Runtime.InteropServices;
 
 namespace Tunkoz.Services;
 
+/// <summary>A captured screen region. Left/Top are the region's origin in physical screen pixels.</summary>
+public sealed class CapturedRegion : IDisposable
+{
+    public required Bitmap Bitmap { get; init; }
+    public int Left { get; init; }
+    public int Top { get; init; }
+
+    public void Dispose() => Bitmap.Dispose();
+}
+
 public class CaptureService
 {
-    private const int SM_XVIRTUALSCREEN = 76;
-    private const int SM_YVIRTUALSCREEN = 77;
-    private const int SM_CXVIRTUALSCREEN = 78;
-    private const int SM_CYVIRTUALSCREEN = 79;
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X, Y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public uint cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
+    }
+
+    private const uint MONITOR_DEFAULTTONEAREST = 2;
+    private const int SRCCOPY = 0x00CC0020;
 
     [DllImport("user32.dll")]
-    private static extern int GetSystemMetrics(int nIndex);
+    private static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetDC(IntPtr hWnd);
@@ -38,8 +70,6 @@ public class CaptureService
     [DllImport("gdi32.dll")]
     private static extern bool DeleteDC(IntPtr hdc);
 
-    private const int SRCCOPY = 0x00CC0020;
-
     private int _captureSize = 500;
 
     public int CaptureSize
@@ -48,29 +78,25 @@ public class CaptureService
         set => _captureSize = Math.Max(100, value);
     }
 
-    public Bitmap? CaptureAroundCursor(int cursorX, int cursorY)
+    /// <summary>
+    /// Captures a square of <paramref name="size"/> physical px centered on the cursor,
+    /// shifted/clamped so it stays inside the monitor that contains the cursor.
+    /// </summary>
+    public CapturedRegion? CaptureAroundCursor(int cursorX, int cursorY, int? size = null)
     {
-        var halfSize = _captureSize / 2;
-        var left = cursorX - halfSize;
-        var top = cursorY - halfSize;
+        var captureSize = size ?? _captureSize;
 
-        // Clamp to virtual screen bounds
-        var screenX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        var screenY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        var screenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        var screenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        var monitor = GetMonitorBounds(cursorX, cursorY);
+        var monWidth = monitor.Right - monitor.Left;
+        var monHeight = monitor.Bottom - monitor.Top;
 
-        left = Math.Max(left, screenX);
-        top = Math.Max(top, screenY);
-
-        var right = Math.Min(left + _captureSize, screenX + screenWidth);
-        var bottom = Math.Min(top + _captureSize, screenY + screenHeight);
-
-        var width = right - left;
-        var height = bottom - top;
-
+        var width = Math.Min(captureSize, monWidth);
+        var height = Math.Min(captureSize, monHeight);
         if (width <= 0 || height <= 0)
             return null;
+
+        var left = Math.Clamp(cursorX - width / 2, monitor.Left, monitor.Right - width);
+        var top = Math.Clamp(cursorY - height / 2, monitor.Top, monitor.Bottom - height);
 
         IntPtr hScreenDC = IntPtr.Zero;
         IntPtr hMemDC = IntPtr.Zero;
@@ -92,14 +118,19 @@ public class CaptureService
                 return null;
 
             oldBitmap = SelectObject(hMemDC, hBitmap);
+            var ok = BitBlt(hMemDC, 0, 0, width, height, hScreenDC, left, top, SRCCOPY);
+            SelectObject(hMemDC, oldBitmap); // restore the DC's original bitmap (never delete it)
 
-            if (!BitBlt(hMemDC, 0, 0, width, height, hScreenDC, left, top, SRCCOPY))
+            if (!ok)
                 return null;
 
-            SelectObject(hMemDC, oldBitmap);
-
-            var bitmap = Image.FromHbitmap(hBitmap);
-            return new Bitmap(bitmap);
+            using var raw = Image.FromHbitmap(hBitmap);
+            return new CapturedRegion
+            {
+                Bitmap = new Bitmap(raw),
+                Left = left,
+                Top = top
+            };
         }
         catch (Exception ex)
         {
@@ -108,8 +139,6 @@ public class CaptureService
         }
         finally
         {
-            if (oldBitmap != IntPtr.Zero)
-                DeleteObject(oldBitmap);
             if (hBitmap != IntPtr.Zero)
                 DeleteObject(hBitmap);
             if (hMemDC != IntPtr.Zero)
@@ -119,28 +148,14 @@ public class CaptureService
         }
     }
 
-    public Bitmap? CaptureAroundCursorWithRetry(int cursorX, int cursorY)
+    private static RECT GetMonitorBounds(int x, int y)
     {
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var hMonitor = MonitorFromPoint(new POINT { X = x, Y = y }, MONITOR_DEFAULTTONEAREST);
+        var info = new MONITORINFO { cbSize = (uint)Marshal.SizeOf<MONITORINFO>() };
+        if (hMonitor != IntPtr.Zero && GetMonitorInfo(hMonitor, ref info))
+            return info.rcMonitor;
 
-        // First attempt
-        var bitmap = CaptureAroundCursor(cursorX, cursorY);
-        if (bitmap != null)
-        {
-            stopwatch.Stop();
-            System.Diagnostics.Debug.WriteLine($"Capture completed in {stopwatch.ElapsedMilliseconds} ms");
-            return bitmap;
-        }
-
-        // Second attempt at 2x size
-        var originalSize = _captureSize;
-        _captureSize *= 2;
-
-        bitmap = CaptureAroundCursor(cursorX, cursorY);
-        _captureSize = originalSize;
-
-        stopwatch.Stop();
-        System.Diagnostics.Debug.WriteLine($"Capture (retry) completed in {stopwatch.ElapsedMilliseconds} ms");
-        return bitmap;
+        // Fallback: a generous area around the cursor
+        return new RECT { Left = x - 2000, Top = y - 2000, Right = x + 2000, Bottom = y + 2000 };
     }
 }

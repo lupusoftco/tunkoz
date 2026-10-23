@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using Tunkoz.Services;
 
 namespace Tunkoz.Views;
@@ -20,12 +21,12 @@ public partial class DebugConsoleWindow : Window
         if (_paused)
             return;
 
-        Dispatcher.Invoke(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             var output = new System.Text.StringBuilder();
             output.AppendLine($"[{result.DetectionTime:HH:mm:ss.fff}] QR Detection Result");
             output.AppendLine($"Position: ({result.CursorX}, {result.CursorY})");
-            output.AppendLine($"Timings: Capture={result.CaptureTimeMs}ms, Decode={result.DecodeTimeMs}ms");
+            output.AppendLine($"Timings: Total={result.TotalTimeMs}ms, Capture={result.CaptureTimeMs}ms, Decode={result.DecodeTimeMs}ms, SecondPass={result.UsedSecondPass}");
             output.AppendLine($"Found: {result.Results.Count} QR code(s)");
 
             foreach (var qr in result.Results)

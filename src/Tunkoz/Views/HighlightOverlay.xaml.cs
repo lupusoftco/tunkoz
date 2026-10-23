@@ -1,15 +1,19 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using Tunkoz.Services;
+using CoreRect = Tunkoz.Core.Models.Rectangle;
 
 namespace Tunkoz.Views
 {
     public partial class HighlightOverlay : Window
     {
         private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_LAYERED = 0x00080000;
         private const int WS_EX_TRANSPARENT = 0x00000020;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
 
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
@@ -20,41 +24,38 @@ namespace Tunkoz.Views
         public HighlightOverlay()
         {
             InitializeComponent();
-            Loaded += OnLoaded;
+            ShowActivated = false;
+            SourceInitialized += OnSourceInitialized;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnSourceInitialized(object? sender, EventArgs e)
         {
-            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TRANSPARENT | WS_EX_LAYERED);
+            // Click-through and never activated. Applied before the window is first shown.
+            var hwnd = new WindowInteropHelper(this).Handle;
+            var exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
         }
 
-        public void ShowAroundQR(System.Drawing.Rectangle bounds)
+        /// <summary>Outlines a QR given in physical screen pixels, then fades out (~300 ms).</summary>
+        public void ShowAroundQR(CoreRect? bounds)
         {
-            Left = bounds.X - 1;
-            Top = bounds.Y - 1;
-            Width = bounds.Width + 2;
-            Height = bounds.Height + 2;
+            if (bounds is not { } rect || rect.Width <= 0 || rect.Height <= 0)
+            {
+                Close();
+                return;
+            }
 
+            WindowPlacementHelper.PlaceOverRect(this, rect, paddingPx: 12);
             Show();
-            FadeOutAndClose();
-        }
 
-        private void FadeOutAndClose()
-        {
             var fadeOut = new DoubleAnimation
             {
                 From = 1.0,
                 To = 0.0,
+                BeginTime = TimeSpan.FromMilliseconds(250),
                 Duration = TimeSpan.FromMilliseconds(300)
             };
-
-            fadeOut.Completed += (s, e) =>
-            {
-                Close();
-            };
-
+            fadeOut.Completed += (s, e) => Close();
             BeginAnimation(OpacityProperty, fadeOut);
         }
     }

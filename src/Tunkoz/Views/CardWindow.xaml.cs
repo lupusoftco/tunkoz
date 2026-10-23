@@ -5,8 +5,10 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using Tunkoz.Core.Models;
 using Tunkoz.Services;
+using CoreRect = Tunkoz.Core.Models.Rectangle;
 
 namespace Tunkoz.Views
 {
@@ -22,21 +24,24 @@ namespace Tunkoz.Views
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-        private QrResult _result;
-        private DispatcherTimer _dismissTimer;
+        private QrResult? _result;
+        private DispatcherTimer? _dismissTimer;
         private int _timeoutSeconds = 8;
 
         public CardWindow()
         {
             InitializeComponent();
-            Loaded += OnLoaded;
+            ShowActivated = false;
+            SourceInitialized += OnSourceInitialized;
             PreviewKeyDown += OnPreviewKeyDown;
             MouseLeave += OnMouseLeave;
             MouseEnter += OnMouseEnter;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnSourceInitialized(object? sender, EventArgs e)
         {
+            // Applied before first show so the card never takes focus
+            // (taking focus would dismiss the app's native context menu).
             IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
@@ -46,9 +51,14 @@ namespace Tunkoz.Views
         {
             _result = result;
             PopulateUI(result);
+
+            // Show off-screen first so SizeToContent gives us the real size, then place it.
+            Left = -32000;
+            Top = -32000;
+            Show();
+            UpdateLayout();
             PositionWindow(cursorX, cursorY, result.BoundingBox);
             StartDismissTimer();
-            Show();
         }
 
         private void PopulateUI(QrResult result)
@@ -117,7 +127,7 @@ namespace Tunkoz.Views
             else if (safety?.Severity == SafetySeverity.Warning)
             {
                 WarningBanner.Visibility = Visibility.Visible;
-                WarningText.Text = GetSafetyWarningText(safety.ReasonKey);
+                WarningText.Text = GetSafetyWarningText(safety.ReasonKey ?? "");
                 PrimaryActionButton.Content = "Open";
                 SecondaryActionButton.Content = "Copy";
                 PrimaryActionButton.Click -= OnPrimaryAction;
@@ -138,7 +148,8 @@ namespace Tunkoz.Views
 
         private void DisplayWiFiCard(Payload payload)
         {
-            string ssid = payload.Metadata.TryGetValue("ssid", out var s) ? s : "Network";
+            var meta = payload.Metadata ?? new Dictionary<string, string>();
+            string ssid = meta.TryGetValue("ssid", out var s) ? s : "Network";
             DomainOrTitle.Text = ssid;
             ContentPreview.Text = "Wi-Fi Network";
 
@@ -147,7 +158,7 @@ namespace Tunkoz.Views
             PrimaryActionButton.Click -= OnPrimaryAction;
             PrimaryActionButton.Click += (s, e) =>
             {
-                if (payload.Metadata.TryGetValue("password", out var pwd))
+                if (meta.TryGetValue("password", out var pwd))
                     CopyToClipboard(pwd);
             };
             SecondaryActionButton.Click -= OnSecondaryAction;
@@ -156,11 +167,12 @@ namespace Tunkoz.Views
 
         private void DisplayVCardCard(Payload payload)
         {
-            string name = payload.Metadata.TryGetValue("name", out var n) ? n : "Contact";
+            var meta = payload.Metadata ?? new Dictionary<string, string>();
+            string name = meta.TryGetValue("name", out var n) ? n : "Contact";
             DomainOrTitle.Text = name;
 
-            var tel = payload.Metadata.TryGetValue("tel", out var t) ? t : "";
-            var email = payload.Metadata.TryGetValue("email", out var em) ? em : "";
+            var tel = meta.TryGetValue("tel", out var t) ? t : "";
+            var email = meta.TryGetValue("email", out var em) ? em : "";
             ContentPreview.Text = $"{(tel != "" ? tel + " " : "")}{(email != "" ? email : "")}".Trim();
 
             PrimaryActionButton.Content = "Save as .vcf";
@@ -265,7 +277,7 @@ namespace Tunkoz.Views
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             timer.Tick += (s, e) =>
             {
-                SecondaryActionButton.Content = _result.Payload.Type == PayloadType.Text ? "Copy" : "Copy";
+                SecondaryActionButton.Content = "Copy";
                 SecondaryActionButton.IsEnabled = true;
                 timer.Stop();
             };
@@ -295,7 +307,7 @@ namespace Tunkoz.Views
             CopyToClipboard(payload.Content);
         }
 
-        private void PositionWindow(int cursorX, int cursorY, System.Drawing.Rectangle qrBounds)
+        private void PositionWindow(int cursorX, int cursorY, CoreRect? qrBounds)
         {
             WindowPlacementHelper.PositionWindowSmartly(this, cursorX, cursorY, qrBounds);
         }
@@ -313,7 +325,7 @@ namespace Tunkoz.Views
 
                 if (elapsed >= _timeoutSeconds * 1000)
                 {
-                    _dismissTimer.Stop();
+                    _dismissTimer?.Stop();
                     Close();
                 }
             };

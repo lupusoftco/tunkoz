@@ -13,37 +13,53 @@ public class QrDecoderService : IDisposable
 
     public QrDecoderService(PayloadParser? parser = null, LinkSafetyAnalyzer? safety = null)
     {
-        var hints = new Dictionary<DecodeHintType, object>
-        {
-            { DecodeHintType.TRY_HARDER, true },
-            { DecodeHintType.ALSO_INVERTED, true },
-            { DecodeHintType.POSSIBLE_FORMATS, new[] { BarcodeFormat.QR_CODE } }
-        };
-
         var options = new DecodingOptions
         {
             TryHarder = true,
+            TryInverted = true,
             PossibleFormats = new[] { BarcodeFormat.QR_CODE }
         };
 
+        // Fast grayscale conversion via LockBits (GetPixel is far too slow for a 500x500 capture)
         Func<Bitmap, LuminanceSource> bitmapToLuminance = bitmap =>
         {
             var width = bitmap.Width;
             var height = bitmap.Height;
-            var pixels = new byte[width * height];
-
-            for (int y = 0; y < height; y++)
+            var rect = new System.Drawing.Rectangle(0, 0, width, height);
+            var data = bitmap.LockBits(rect,
+                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            try
             {
-                for (int x = 0; x < width; x++)
-                {
-                    var color = bitmap.GetPixel(x, y);
-                    // Convert RGB to grayscale using standard formula
-                    var gray = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
-                    pixels[y * width + x] = gray;
-                }
-            }
+                var stride = Math.Abs(data.Stride);
+                var raw = new byte[stride * height];
+                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, raw, 0, raw.Length);
 
-            return new RGBLuminanceSource(pixels, width, height, RGBLuminanceSource.BitmapFormat.Gray8);
+                var gray = new byte[width * height];
+                for (int y = 0; y < height; y++)
+                {
+                    var row = y * stride;
+                    var outRow = y * width;
+                    for (int x = 0; x < width; x++)
+                    {
+                        var i = row + x * 4; // BGRA
+                        var b = raw[i];
+                        var g = raw[i + 1];
+                        var r = raw[i + 2];
+                        var a = raw[i + 3];
+                        var lum = (r * 299 + g * 587 + b * 114) / 1000;
+                        // Treat transparent pixels as white (common for QR PNGs)
+                        lum = (lum * a + 255 * (255 - a)) / 255;
+                        gray[outRow + x] = (byte)lum;
+                    }
+                }
+
+                return new RGBLuminanceSource(gray, width, height, RGBLuminanceSource.BitmapFormat.Gray8);
+            }
+            finally
+            {
+                bitmap.UnlockBits(data);
+            }
         };
 
         _reader = new BarcodeReader<Bitmap>(bitmapToLuminance)

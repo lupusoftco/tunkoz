@@ -9,6 +9,8 @@ public partial class MainWindow : Window
     private readonly QrDetectionPipeline _pipeline;
     private readonly TrayService _trayService;
     private DebugConsoleWindow? _debugConsole;
+    private CardWindow? _currentCard;
+    private bool _disposed;
 
     public MainWindow()
     {
@@ -24,22 +26,36 @@ public partial class MainWindow : Window
         if (result.Results.Count == 0)
             return;
 
-        var firstResult = result.Results[0];
+        // The pipeline raises this on a background thread; WPF windows must be created on the UI thread.
+        Dispatcher.InvokeAsync(() =>
+        {
+            if (_disposed)
+                return;
 
-        // Show highlight overlay around detected QR
-        var overlay = new HighlightOverlay();
-        overlay.ShowAroundQR(firstResult.BoundingBox);
+            var qr = result.Results[0];
 
-        // Show result card
-        var cardWindow = new CardWindow();
-        cardWindow.DisplayResult(firstResult, result.CursorX, result.CursorY);
+            // Only one card at a time: a new right-click replaces the previous card
+            _currentCard?.Close();
+
+            var overlay = new HighlightOverlay();
+            overlay.ShowAroundQR(qr.BoundingBox);
+
+            var card = new CardWindow();
+            card.Closed += (s, e) =>
+            {
+                if (ReferenceEquals(_currentCard, s))
+                    _currentCard = null;
+            };
+            _currentCard = card;
+            card.DisplayResult(qr, result.CursorX, result.CursorY);
+        });
     }
 
     private void OnDebugClick(object sender, RoutedEventArgs e)
     {
         if (_debugConsole?.IsVisible == true)
         {
-            _debugConsole.Focus();
+            _debugConsole.Activate();
         }
         else
         {
@@ -50,16 +66,25 @@ public partial class MainWindow : Window
 
     private void OnExitClick(object sender, RoutedEventArgs e)
     {
-        _debugConsole?.Close();
-        _pipeline.Dispose();
-        _trayService.Dispose();
-        Close();
+        Application.Current.Shutdown();
     }
 
     protected override void OnClosed(EventArgs e)
     {
+        Cleanup();
+        base.OnClosed(e);
+        Application.Current.Shutdown();
+    }
+
+    private void Cleanup()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        _currentCard?.Close();
+        _debugConsole?.Close();
         _pipeline.Dispose();
         _trayService.Dispose();
-        base.OnClosed(e);
     }
 }

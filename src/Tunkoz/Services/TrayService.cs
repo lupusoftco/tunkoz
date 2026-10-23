@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Forms;
+using Application = System.Windows.Application;
 using Tunkoz.Views;
 
 namespace Tunkoz.Services;
@@ -17,7 +18,7 @@ public class TrayService : IDisposable
         _notifyIcon = new NotifyIcon();
 
         // Set up tray icon (use a placeholder emoji/text for now)
-        _notifyIcon.Icon = SystemIcons.Application;
+        _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
         _notifyIcon.Text = "Tünköz - QR Detector";
         _notifyIcon.Visible = true;
         _notifyIcon.ContextMenuStrip = BuildContextMenu(mainWindow);
@@ -116,22 +117,22 @@ public class TrayService : IDisposable
 // Simple relay command for MVVM compatibility
 public class RelayCommand : System.Windows.Input.ICommand
 {
-    private readonly Action<object> _execute;
-    private readonly Func<object, bool> _canExecute;
+    private readonly Action<object?> _execute;
+    private readonly Func<object?, bool>? _canExecute;
 
-    public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+    public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
     {
         _execute = execute ?? throw new ArgumentNullException(nameof(execute));
         _canExecute = canExecute;
     }
 
-    public event EventHandler CanExecuteChanged
+    public event EventHandler? CanExecuteChanged
     {
         add { System.Windows.Input.CommandManager.RequerySuggested += value; }
         remove { System.Windows.Input.CommandManager.RequerySuggested -= value; }
     }
 
-    public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
+    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
 
-    public void Execute(object parameter) => _execute(parameter);
+    public void Execute(object? parameter) => _execute(parameter);
 }

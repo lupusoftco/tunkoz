@@ -1,171 +1,161 @@
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Media;
+using CoreRect = Tunkoz.Core.Models.Rectangle;
 
 namespace Tunkoz.Services;
 
-public class WindowPlacementHelper
+/// <summary>
+/// Positions popup windows. All inputs are physical screen pixels (from the hook / capture);
+/// WPF Left/Top/Width/Height are DIPs, so results are converted with the current DPI scale.
+/// </summary>
+public static class WindowPlacementHelper
 {
-    [DllImport("user32.dll")]
-    private static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
 
-    [DllImport("user32.dll")]
-    private static extern bool GetWindowRect(IntPtr hWnd, out System.Drawing.Rectangle lpRect);
-
-    [DllImport("user32.dll")]
-    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr MonitorFromPoint(System.Drawing.Point pt, uint dwFlags);
-
-    private const uint MONITOR_DEFAULTTONEAREST = 2;
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X, Y;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MONITORINFO
     {
         public uint cbSize;
-        public System.Drawing.Rectangle rcMonitor;
-        public System.Drawing.Rectangle rcWork;
+        public RECT rcMonitor;
+        public RECT rcWork;
         public uint dwFlags;
     }
 
-    public static void PositionWindowSmartly(
-        Window window,
-        int cursorX,
-        int cursorY,
-        System.Drawing.Rectangle qrBounds)
-    {
-        // Try to find native context menu (class "#32768")
-        var contextMenuHandle = FindContextMenu();
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr FindWindow(string lpClassName, string? lpWindowName);
 
-        if (contextMenuHandle != IntPtr.Zero && GetWindowRect(contextMenuHandle, out var menuRect))
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
+
+    private const uint MONITOR_DEFAULTTONEAREST = 2;
+    private const double Gap = 8;
+    private const double DefaultWidthDip = 336;
+    private const double DefaultHeightDip = 180;
+
+    /// <summary>Physical-pixels-per-DIP for the current process (system DPI).</summary>
+    public static double GetDpiScale()
+    {
+        var main = Application.Current?.MainWindow;
+        if (main != null)
         {
-            // Position beside the context menu
-            PositionBesideContextMenu(window, menuRect, cursorX, cursorY);
+            var source = PresentationSource.FromVisual(main);
+            if (source?.CompositionTarget != null)
+                return source.CompositionTarget.TransformToDevice.M11;
+
+            return VisualTreeHelper.GetDpi(main).DpiScaleX;
+        }
+        return 1.0;
+    }
+
+    public static void PositionWindowSmartly(Window window, int cursorX, int cursorY, CoreRect? qrBounds)
+    {
+        var scale = GetDpiScale();
+        var widthPx = (window.ActualWidth > 0 ? window.ActualWidth : DefaultWidthDip) * scale;
+        var heightPx = (window.ActualHeight > 0 ? window.ActualHeight : DefaultHeightDip) * scale;
+        var work = GetWorkArea(cursorX, cursorY);
+
+        double left, top;
+
+        var menu = FindContextMenu();
+        if (menu.HasValue)
+        {
+            var m = menu.Value;
+            // Prefer the right side of the native menu, otherwise the left side
+            left = m.Right + Gap * scale;
+            if (left + widthPx > work.Right)
+                left = m.Left - Gap * scale - widthPx;
+            top = m.Top;
         }
         else
         {
-            // Position beside QR bounds
-            PositionBesideQR(window, qrBounds, cursorX, cursorY);
+            var box = qrBounds ?? new CoreRect { X = cursorX - 50, Y = cursorY - 50, Width = 100, Height = 100 };
+
+            // Below the QR first, then above, then to the right
+            left = box.X + (box.Width - widthPx) / 2;
+            top = box.Y + box.Height + Gap * scale;
+
+            if (top + heightPx > work.Bottom)
+                top = box.Y - heightPx - Gap * scale;
+
+            if (top < work.Top)
+            {
+                left = box.X + box.Width + Gap * scale;
+                top = box.Y;
+            }
         }
-    }
 
-    private static IntPtr FindContextMenu()
-    {
-        // Search for the standard Windows context menu window
-        // This is a heuristic; real implementation might need to search more thoroughly
-        return FindWindowEx(IntPtr.Zero, IntPtr.Zero, "#32768", null);
-    }
+        // Clamp to the work area
+        left = Math.Max(work.Left, Math.Min(left, work.Right - widthPx));
+        top = Math.Max(work.Top, Math.Min(top, work.Bottom - heightPx));
 
-    private static void PositionBesideContextMenu(
-        Window window,
-        System.Drawing.Rectangle menuRect,
-        int cursorX,
-        int cursorY)
-    {
-        var monitor = GetMonitorFromCursor(cursorX, cursorY);
-
-        // Try to position to the right of the menu
-        double proposedLeft = menuRect.Right + 10;
-        double proposedTop = menuRect.Top;
-
-        ClampToMonitor(window, ref proposedLeft, ref proposedTop, monitor);
-
-        window.Left = proposedLeft;
-        window.Top = proposedTop;
-    }
-
-    private static void PositionBesideQR(
-        Window window,
-        System.Drawing.Rectangle qrBounds,
-        int cursorX,
-        int cursorY)
-    {
-        var monitor = GetMonitorFromCursor(cursorX, cursorY);
-
-        double windowWidth = window.ActualWidth > 0 ? window.ActualWidth : 336;
-        double windowHeight = window.ActualHeight > 0 ? window.ActualHeight : 200;
-
-        // Try positioning above QR
-        double proposedLeft = qrBounds.Left + (qrBounds.Width - windowWidth) / 2;
-        double proposedTop = qrBounds.Top - windowHeight - 10;
-
-        // Check if it fits; if not, try below
-        if (!FitsInMonitor(proposedLeft, proposedTop, windowWidth, windowHeight, monitor))
+        // Never cover the cursor (native menus open at the cursor)
+        if (cursorX >= left && cursorX <= left + widthPx && cursorY >= top && cursorY <= top + heightPx)
         {
-            proposedTop = qrBounds.Bottom + 10;
+            var below = cursorY + 24 * scale;
+            top = below + heightPx <= work.Bottom ? below : cursorY - heightPx - 24 * scale;
+            top = Math.Max(work.Top, top);
         }
 
-        // Check again; if still doesn't fit, try to the right
-        if (!FitsInMonitor(proposedLeft, proposedTop, windowWidth, windowHeight, monitor))
+        window.Left = left / scale;
+        window.Top = top / scale;
+    }
+
+    /// <summary>Sets a window to exactly cover a physical-pixel rectangle.</summary>
+    public static void PlaceOverRect(Window window, CoreRect rect, int paddingPx)
+    {
+        var scale = GetDpiScale();
+        window.Left = (rect.X - paddingPx) / scale;
+        window.Top = (rect.Y - paddingPx) / scale;
+        window.Width = (rect.Width + paddingPx * 2) / scale;
+        window.Height = (rect.Height + paddingPx * 2) / scale;
+    }
+
+    private static RECT? FindContextMenu()
+    {
+        // Classic Win32 popup menus use the "#32768" window class
+        var hwnd = FindWindow("#32768", null);
+        if (hwnd != IntPtr.Zero && IsWindowVisible(hwnd) && GetWindowRect(hwnd, out var rect))
+            return rect;
+        return null;
+    }
+
+    private static RECT GetWorkArea(int x, int y)
+    {
+        var hMonitor = MonitorFromPoint(new POINT { X = x, Y = y }, MONITOR_DEFAULTTONEAREST);
+        var info = new MONITORINFO { cbSize = (uint)Marshal.SizeOf<MONITORINFO>() };
+        if (hMonitor != IntPtr.Zero && GetMonitorInfo(hMonitor, ref info))
+            return info.rcWork;
+
+        var sw = SystemParameters.WorkArea;
+        var s = GetDpiScale();
+        return new RECT
         {
-            proposedLeft = qrBounds.Right + 10;
-            proposedTop = qrBounds.Top + (qrBounds.Height - windowHeight) / 2;
-        }
-
-        // Final fallback: clamp to monitor
-        ClampToMonitor(window, ref proposedLeft, ref proposedTop, monitor);
-
-        // Ensure cursor is not covered
-        if (IsPointInWindow(cursorX, cursorY, proposedLeft, proposedTop, windowWidth, windowHeight))
-        {
-            proposedTop = Math.Max(proposedTop, cursorY + 20);
-        }
-
-        window.Left = proposedLeft;
-        window.Top = proposedTop;
-    }
-
-    private static MONITORINFO GetMonitorFromCursor(int cursorX, int cursorY)
-    {
-        var point = new System.Drawing.Point(cursorX, cursorY);
-        var hMonitor = MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST);
-
-        var info = new MONITORINFO { cbSize = (uint)Marshal.SizeOf(typeof(MONITORINFO)) };
-        GetMonitorInfo(hMonitor, ref info);
-        return info;
-    }
-
-    private static bool FitsInMonitor(
-        double left,
-        double top,
-        double width,
-        double height,
-        MONITORINFO monitor)
-    {
-        var work = monitor.rcWork;
-        return left >= work.Left &&
-               top >= work.Top &&
-               left + width <= work.Right &&
-               top + height <= work.Bottom;
-    }
-
-    private static void ClampToMonitor(
-        Window window,
-        ref double left,
-        ref double top,
-        MONITORINFO monitor)
-    {
-        var work = monitor.rcWork;
-        double windowWidth = window.ActualWidth > 0 ? window.ActualWidth : 336;
-        double windowHeight = window.ActualHeight > 0 ? window.ActualHeight : 200;
-
-        left = Math.Max(work.Left, Math.Min(left, work.Right - windowWidth));
-        top = Math.Max(work.Top, Math.Min(top, work.Bottom - windowHeight));
-    }
-
-    private static bool IsPointInWindow(
-        int pointX,
-        int pointY,
-        double windowLeft,
-        double windowTop,
-        double windowWidth,
-        double windowHeight)
-    {
-        return pointX >= windowLeft &&
-               pointX <= windowLeft + windowWidth &&
-               pointY >= windowTop &&
-               pointY <= windowTop + windowHeight;
+            Left = (int)(sw.Left * s),
+            Top = (int)(sw.Top * s),
+            Right = (int)(sw.Right * s),
+            Bottom = (int)(sw.Bottom * s)
+        };
     }
 }

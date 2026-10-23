@@ -1,6 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Metrics merged here so StaticResource lookups below always resolve at load time -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Themes/Metrics.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <!-- Button Styles -->
     <Style x:Key="TunkozPrimaryButton" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource Tunkoz.Brush.Accent.Fill}"/>

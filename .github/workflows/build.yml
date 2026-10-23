@@ -1,0 +1,54 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        dotnet-version: ['8.0.x']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal --configuration Release
+
+    - name: Publish self-contained executable
+      run: dotnet publish -c Release -o publish --self-contained -r win-x64 src/Tunkoz/Tunkoz.csproj
+
+    - name: Upload executable artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Tunkoz-win-x64
+        path: publish/Tunkoz.exe
+        retention-days: 30
+
+    - name: Create release archive
+      run: |
+        cd publish
+        7z a Tunkoz-win-x64.zip Tunkoz.exe
+        cd ..
+
+    - name: Upload release archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: Tunkoz-release
+        path: publish/Tunkoz-win-x64.zip
+        retention-days: 30

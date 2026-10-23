@@ -1,8 +1,12 @@
 name: Release
 
+# Publishing a release: push main to the `release` branch (or run this workflow manually).
+# The tag is taken from <Version> in src/Tunkoz/Tunkoz.csproj, e.g. 0.1.0 -> v0.1.0.
+# 0.x versions are marked as pre-releases.
 on:
   push:
-    tags: [ 'v*' ]
+    branches: [ release ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,22 +25,38 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release
 
+    - name: Determine version
+      id: ver
+      shell: pwsh
+      run: |
+        [xml]$proj = Get-Content src/Tunkoz/Tunkoz.csproj
+        $version = ($proj.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ } | Select-Object -First 1).Trim()
+        "version=$version" >> $env:GITHUB_OUTPUT
+        "tag=v$version" >> $env:GITHUB_OUTPUT
+
     - name: Publish single-file exe
       shell: pwsh
       run: |
-        $version = "${{ github.ref_name }}".TrimStart('v') -replace '-.*$', ''
+        $version = "${{ steps.ver.outputs.version }}"
+        $tag = "${{ steps.ver.outputs.tag }}"
         dotnet publish src/Tunkoz/Tunkoz.csproj -c Release -r win-x64 --self-contained `
           -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:EnableCompressionInSingleFile=true -p:Version=$version -o publish
-        Compress-Archive -Path publish/Tunkoz.exe -DestinationPath "Tunkoz-${{ github.ref_name }}-win-x64.zip"
-        Copy-Item publish/Tunkoz.exe "Tunkoz-${{ github.ref_name }}-win-x64.exe"
+        Compress-Archive -Path publish/Tunkoz.exe -DestinationPath "Tunkoz-$tag-win-x64.zip"
+        Copy-Item publish/Tunkoz.exe "Tunkoz-$tag-win-x64.exe"
 
     - name: Create GitHub release
       shell: pwsh
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        $tag = "${{ github.ref_name }}"
-        $pre = if ($tag -match '-') { '--prerelease' } else { '' }
-        gh release create $tag "Tunkoz-$tag-win-x64.exe" "Tunkoz-$tag-win-x64.zip" `
-          --title "Tünköz $tag" --generate-notes $pre
+        $tag = "${{ steps.ver.outputs.tag }}"
+        gh release view $tag 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Output "::error::Release $tag already exists. Bump <Version> in src/Tunkoz/Tunkoz.csproj first."
+          exit 1
+        }
+        $args = @($tag, "Tunkoz-$tag-win-x64.exe", "Tunkoz-$tag-win-x64.zip",
+                  '--target', '${{ github.sha }}', '--title', "Tünköz $tag", '--generate-notes')
+        if ($tag -match '^v0\.') { $args += '--prerelease' }
+        gh release create @args

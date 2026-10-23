@@ -12,14 +12,13 @@ Tünköz respects your privacy. We collect nothing, store nothing remotely, and 
 2. **Screenshot capture**: A 500×500 px region around your cursor is captured into memory, decoded, and destroyed.
 3. **QR decoding**: The decoded text is parsed locally using ZXing.Net and our payload parser.
 4. **URL safety analysis**: URLs are checked against offline pattern lists (no network queries).
-5. **Settings storage**: Your preferences (theme, language, region size, timeout) are saved to `%AppData%\Tunkoz` as JSON.
+5. **Settings storage**: Your preferences (currently just the UI language) are saved to `%AppData%\Tunkoz` as JSON.
 
 ### What Leaves Your Computer
 
 **By default: nothing.**
 
-**Optional features**:
-- **Expand short links**: When enabled in Settings, clicking "Expand" on a short URL makes a HEAD HTTP request to follow the redirect chain and show the final URL. This request reveals your IP, User-Agent, and that you clicked that link.
+**Optional features**: none yet. A planned "Expand short links" option would make a HEAD request to follow a shortened link's redirects; it will be off by default and clearly labelled in Settings.
 
 ## What Tünköz Does NOT Do
 
@@ -30,7 +29,7 @@ Tünköz respects your privacy. We collect nothing, store nothing remotely, and 
 - ✗ Does not sell or share your data
 - ✗ Does not require an internet connection
 - ✗ Does not require admin rights
-- ✗ Does not modify files outside %AppData%\Tunkoz
+- ✗ Does not modify files outside %AppData%\Tunkoz (except a `.vcf` contact you explicitly choose to save)
 
 ## Hook Behavior
 
@@ -51,7 +50,6 @@ Tünköz assumes:
 Tünköz does not protect against:
 - Malicious QR code content (e.g., phishing URLs)—safety warnings help, but user judgment is final
 - Malware on your device (no sandboxing)
-- Man-in-the-middle attacks if you disable link expansion warnings
 
 ## Settings & Data Location
 
@@ -63,13 +61,7 @@ All persistent data lives in:
 Contents:
 ```json
 {
-  "theme": "system",
-  "language": "en",
-  "captureRegionSize": 500,
-  "cardTimeout": 8,
-  "disableInFullscreen": false,
-  "excludedProcesses": [],
-  "expandShortLinks": false
+  "Language": "system"
 }
 ```
 
@@ -85,14 +77,14 @@ You can delete this file at any time to reset to defaults.
 ## Contact & Transparency
 
 If you have privacy concerns or discover a privacy issue:
-1. Open an issue on [GitHub](https://github.com/anthropics/tunkoz/issues) (public) or
+1. Open an issue on [GitHub](https://github.com/lupusoftco/tunkoz/issues) (public) or
 2. Email tunkoz-security@example.com (private)
 
 We will acknowledge and fix credible issues promptly.
 
 ## Changes to This Policy
 
-This policy reflects Tünköz's design. If we change code in ways that affect privacy, we will update this document and release a new version. You can review the source code anytime at https://github.com/anthropics/tunkoz.
+This policy reflects Tünköz's design. If we change code in ways that affect privacy, we will update this document and release a new version. You can review the source code anytime at https://github.com/lupusoftco/tunkoz.
 
 ---
 

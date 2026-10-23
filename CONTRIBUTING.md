@@ -5,12 +5,12 @@ Thank you for your interest in contributing! We welcome bug reports, feature ide
 ## Before You Start
 
 - Read [README.md](README.md) and [PRIVACY.md](PRIVACY.md)
-- Review the [project specification](https://github.com/anthropics/tunkoz/wiki/Architecture) (milestones, tech stack, acceptance criteria)
-- Check [open issues](https://github.com/anthropics/tunkoz/issues) to avoid duplication
+- Review the [project specification](CLAUDE.md) (milestones, tech stack, acceptance criteria)
+- Check [open issues](https://github.com/lupusoftco/tunkoz/issues) to avoid duplication
 
 ## Reporting Bugs
 
-Open a [GitHub issue](https://github.com/anthropics/tunkoz/issues/new?template=bug_report.md) with:
+Open a [GitHub issue](https://github.com/lupusoftco/tunkoz/issues/new?template=bug_report.md) with:
 1. **Windows version** (11 22H2, 10 21H2, etc.)
 2. **Display scaling** (100%, 150%, 200%)
 3. **Exact app** where the click happened (Chrome, Edge, WhatsApp, PDF, etc.)
@@ -29,7 +29,7 @@ Example:
 ### Setup
 
 ```bash
-git clone https://github.com/anthropics/tunkoz
+git clone https://github.com/lupusoftco/tunkoz
 cd tunkoz
 dotnet build
 dotnet test
@@ -94,7 +94,7 @@ Tünköz follows a phased roadmap. New features are welcome but may be deferred 
 4. **Milestone 4**: CI/CD, release, winget
 5. **Milestone 5**: Code signing
 
-If you want to work on a feature across multiple milestones, open a [discussion](https://github.com/anthropics/tunkoz/discussions) first to align on scope and priority.
+If you want to work on a feature across multiple milestones, open a [discussion](https://github.com/lupusoftco/tunkoz/discussions) first to align on scope and priority.
 
 ## Documentation
 
@@ -119,8 +119,8 @@ If you want to work on a feature across multiple milestones, open a [discussion]
 
 ## Questions?
 
-- **Usage**: Open a [discussion](https://github.com/anthropics/tunkoz/discussions)
-- **Architecture**: Check the [wiki](https://github.com/anthropics/tunkoz/wiki)
+- **Usage**: Open a [discussion](https://github.com/lupusoftco/tunkoz/discussions)
+- **Architecture**: See [CLAUDE.md](CLAUDE.md)
 - **Security**: Email tunkoz-security@example.com (private)
 
 ---

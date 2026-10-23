@@ -125,7 +125,7 @@ Position: (512, 384)
 Timings: Capture=28ms, Decode=12ms
 Found: 1 QR code(s)
   - Type: Url
-    Content: https://github.com/anthropics/tunkoz
+    Content: https://github.com/lupusoftco/tunkoz
     Safety: Safe (null)
     Domain: github.com
     Bounds: (450, 320) 120x120

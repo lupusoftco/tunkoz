@@ -14,7 +14,7 @@
     <GenerateTargetFrameworkMonikerAttribute>false</GenerateTargetFrameworkMonikerAttribute>
     <AssemblyName>Tunkoz</AssemblyName>
     <RootNamespace>Tunkoz</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Tünköz Contributors</Authors>
     <Description>Right-click any QR code on Windows</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -1,27 +1,45 @@
 using System;
-using System.Windows;
 using System.Windows.Forms;
-using Application = System.Windows.Application;
 using Tunkoz.Views;
 
 namespace Tunkoz.Services;
 
+/// <summary>Owns the notification-area icon and its context menu. This is the app's only persistent UI.</summary>
 public class TrayService : IDisposable
 {
     private readonly QrDetectionPipeline _pipeline;
+    private readonly Action _openDebugConsole;
+    private readonly Action _quit;
     private readonly NotifyIcon _notifyIcon;
+    private ToolStripMenuItem? _pauseItem;
     private bool _isPaused;
 
-    public TrayService(QrDetectionPipeline pipeline, Window mainWindow)
+    public TrayService(QrDetectionPipeline pipeline, Action openDebugConsole, Action quit)
     {
         _pipeline = pipeline;
-        _notifyIcon = new NotifyIcon();
+        _openDebugConsole = openDebugConsole;
+        _quit = quit;
 
-        // Set up tray icon (use a placeholder emoji/text for now)
-        _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
-        _notifyIcon.Text = "Tünköz - QR Detector";
-        _notifyIcon.Visible = true;
-        _notifyIcon.ContextMenuStrip = BuildContextMenu(mainWindow);
+        _notifyIcon = new NotifyIcon
+        {
+            // Placeholder until the Claude Design icon set is wired in (Milestone 4)
+            Icon = System.Drawing.SystemIcons.Application,
+            Text = "Tünköz — Active",
+            Visible = true,
+            ContextMenuStrip = BuildContextMenu()
+        };
+        _notifyIcon.DoubleClick += (_, _) => _openDebugConsole();
+    }
+
+    public bool IsPaused => _isPaused;
+
+    public void ShowStartedNotification()
+    {
+        _notifyIcon.ShowBalloonTip(
+            3000,
+            "Tünköz is running",
+            "Right-click any QR code on screen. Tünköz lives in the system tray.",
+            ToolTipIcon.Info);
     }
 
     public void Pause()
@@ -31,7 +49,9 @@ public class TrayService : IDisposable
 
         _isPaused = true;
         _pipeline.Stop();
-        _notifyIcon.Text = "Tünköz - Paused";
+        _notifyIcon.Text = "Tünköz — Paused";
+        if (_pauseItem != null)
+            _pauseItem.Text = "Resume";
     }
 
     public void Resume()
@@ -41,68 +61,41 @@ public class TrayService : IDisposable
 
         _isPaused = false;
         _pipeline.Start();
-        _notifyIcon.Text = "Tünköz - Active";
+        _notifyIcon.Text = "Tünköz — Active";
+        if (_pauseItem != null)
+            _pauseItem.Text = "Pause";
     }
 
-    public bool IsPaused => _isPaused;
-
-    private ContextMenuStrip BuildContextMenu(Window mainWindow)
+    private ContextMenuStrip BuildContextMenu()
     {
         var menu = new ContextMenuStrip();
 
-        // Pause/Resume
-        var pauseItem = new ToolStripMenuItem(_isPaused ? "Resume" : "Pause");
-        pauseItem.Click += (s, e) =>
+        _pauseItem = new ToolStripMenuItem("Pause");
+        _pauseItem.Click += (_, _) =>
         {
-            if (_isPaused)
-                Resume();
-            else
-                Pause();
-
-            pauseItem.Text = _isPaused ? "Resume" : "Pause";
+            if (_isPaused) Resume();
+            else Pause();
         };
-        menu.Items.Add(pauseItem);
+        menu.Items.Add(_pauseItem);
 
-        // Separator
         menu.Items.Add(new ToolStripSeparator());
 
-        // Settings
         var settingsItem = new ToolStripMenuItem("Settings");
-        settingsItem.Click += (s, e) =>
-        {
-            var settingsWindow = new SettingsWindow();
-            settingsWindow.ShowDialog();
-        };
+        settingsItem.Click += (_, _) => new SettingsWindow().Show();
         menu.Items.Add(settingsItem);
 
-        // About
+        var debugItem = new ToolStripMenuItem("Debug console");
+        debugItem.Click += (_, _) => _openDebugConsole();
+        menu.Items.Add(debugItem);
+
         var aboutItem = new ToolStripMenuItem("About");
-        aboutItem.Click += (s, e) =>
-        {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.ShowDialog();
-        };
+        aboutItem.Click += (_, _) => new AboutWindow().Show();
         menu.Items.Add(aboutItem);
 
-        // Separator
         menu.Items.Add(new ToolStripSeparator());
 
-        // Start with Windows (placeholder)
-        var startupItem = new ToolStripMenuItem("Start with Windows", null, (s, e) =>
-        {
-            // TODO: Implement registry autostart logic
-        });
-        menu.Items.Add(startupItem);
-
-        // Separator
-        menu.Items.Add(new ToolStripSeparator());
-
-        // Quit
         var quitItem = new ToolStripMenuItem("Quit");
-        quitItem.Click += (s, e) =>
-        {
-            Application.Current.Shutdown();
-        };
+        quitItem.Click += (_, _) => _quit();
         menu.Items.Add(quitItem);
 
         return menu;
@@ -110,29 +103,7 @@ public class TrayService : IDisposable
 
     public void Dispose()
     {
-        _notifyIcon?.Dispose();
+        _notifyIcon.Visible = false;
+        _notifyIcon.Dispose();
     }
-}
-
-// Simple relay command for MVVM compatibility
-public class RelayCommand : System.Windows.Input.ICommand
-{
-    private readonly Action<object?> _execute;
-    private readonly Func<object?, bool>? _canExecute;
-
-    public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
-    {
-        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecute = canExecute;
-    }
-
-    public event EventHandler? CanExecuteChanged
-    {
-        add { System.Windows.Input.CommandManager.RequerySuggested += value; }
-        remove { System.Windows.Input.CommandManager.RequerySuggested -= value; }
-    }
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
-
-    public void Execute(object? parameter) => _execute(parameter);
 }

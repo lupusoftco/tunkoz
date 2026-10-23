@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Media;
 using CoreRect = Tunkoz.Core.Models.Rectangle;
 
 namespace Tunkoz.Services;
@@ -54,19 +53,26 @@ public static class WindowPlacementHelper
     private const double DefaultWidthDip = 336;
     private const double DefaultHeightDip = 180;
 
-    /// <summary>Physical-pixels-per-DIP for the current process (system DPI).</summary>
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForSystem();
+
+    /// <summary>Physical-pixels-per-DIP for the current process (system DPI; the app is system-DPI-aware).</summary>
     public static double GetDpiScale()
     {
-        var main = Application.Current?.MainWindow;
-        if (main != null)
+        try
         {
-            var source = PresentationSource.FromVisual(main);
-            if (source?.CompositionTarget != null)
-                return source.CompositionTarget.TransformToDevice.M11;
-
-            return VisualTreeHelper.GetDpi(main).DpiScaleX;
+            var dpi = GetDpiForSystem();
+            if (dpi > 0)
+                return dpi / 96.0;
         }
-        return 1.0;
+        catch (EntryPointNotFoundException)
+        {
+            // Pre-1607 Windows 10: fall back to WPF's view of the system DPI
+        }
+
+        return SystemParameters.PrimaryScreenHeight > 0
+            ? System.Windows.Forms.Screen.PrimaryScreen!.Bounds.Height / SystemParameters.PrimaryScreenHeight
+            : 1.0;
     }
 
     public static void PositionWindowSmartly(Window window, int cursorX, int cursorY, CoreRect? qrBounds)

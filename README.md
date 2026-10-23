@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lupusoftco/tunkoz/releases/latest"><img alt="Download" src="https://img.shields.io/github/v/release/lupusoftco/tunkoz?include_prereleases&label=download&color=F5B83D&labelColor=1B1F45"></a>
+  <a href="https://github.com/lupusoftco/tunkoz/releases"><img alt="Download" src="https://img.shields.io/github/v/release/lupusoftco/tunkoz?include_prereleases&label=download&color=F5B83D&labelColor=1B1F45"></a>
   <img alt="Windows 10 / 11" src="https://img.shields.io/badge/Windows-10%20%2F%2011-1B1F45">
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1B1F45"></a>
 </p>
@@ -19,7 +19,7 @@ On macOS you can right-click a QR code and open its link. Windows has no such th
 
 ## Download
 
-1. Grab **`Tunkoz-…-win-x64.exe`** from the [latest release](https://github.com/lupusoftco/tunkoz/releases/latest).
+1. Grab **`Tunkoz-…-win-x64.exe`** from the [latest release](https://github.com/lupusoftco/tunkoz/releases).
 2. Run it. There’s no installer and no admin rights needed; Tünköz lives in the notification area.
 3. Right-click any QR code on screen.
 

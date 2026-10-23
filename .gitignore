@@ -1,0 +1,50 @@
+## Rider
+.idea/
+
+## Visual Studio
+.vs/
+.vscode/
+*.sln.iml
+
+## Build outputs
+bin/
+obj/
+dist/
+publish/
+
+## NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+.nuget/
+
+## User-specific
+appsettings.local.json
+launchSettings.json
+*.user
+*.suo
+
+## OS
+Thumbs.db
+.DS_Store
+*.swp
+*.swo
+*~
+
+## Logs
+logs/
+*.log
+
+## Temporary files
+*.tmp
+temp/
+.temp/
+
+## Test artifacts
+TestResults/
+coverage/
+*.trx
+
+## App-specific
+%AppData%/Tunkoz/

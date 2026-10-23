@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,14 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <UseWPF>true</UseWPF>
+    <UseWPF Condition="'$(OS)' == 'Windows_NT'">true</UseWPF>
+    <UseWindowsForms Condition="'$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    <DisableWindowsTargetingCheck>true</DisableWindowsTargetingCheck>
     <AssemblyName>Tunkoz</AssemblyName>
     <RootNamespace>Tunkoz</RootNamespace>
     <Version>0.1.0</Version>
     <Authors>Tünköz Contributors</Authors>
     <Description>Right-click any QR code on Windows</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/anthropics/tunkoz</RepositoryUrl>
+    <RepositoryUrl>https://github.com/lupusoftco/tunkoz</RepositoryUrl>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 

@@ -5,9 +5,9 @@ using Tunkoz.Core.Models;
 
 namespace Tunkoz.Core;
 
-public class QrDecoderService
+public class QrDecoderService : IDisposable
 {
-    private readonly IReader _reader;
+    private readonly BarcodeReader<Bitmap> _reader;
     private readonly PayloadParser _parser;
     private readonly LinkSafetyAnalyzer _safety;
 
@@ -20,7 +20,36 @@ public class QrDecoderService
             { DecodeHintType.POSSIBLE_FORMATS, new[] { BarcodeFormat.QR_CODE } }
         };
 
-        _reader = new MultiFormatReader { Hints = hints };
+        var options = new DecodingOptions
+        {
+            TryHarder = true,
+            PossibleFormats = new[] { BarcodeFormat.QR_CODE }
+        };
+
+        Func<Bitmap, LuminanceSource> bitmapToLuminance = bitmap =>
+        {
+            var width = bitmap.Width;
+            var height = bitmap.Height;
+            var pixels = new byte[width * height];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var color = bitmap.GetPixel(x, y);
+                    // Convert RGB to grayscale using standard formula
+                    var gray = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
+                    pixels[y * width + x] = gray;
+                }
+            }
+
+            return new RGBLuminanceSource(pixels, width, height, RGBLuminanceSource.BitmapFormat.Gray8);
+        };
+
+        _reader = new BarcodeReader<Bitmap>(bitmapToLuminance)
+        {
+            Options = options
+        };
         _parser = parser ?? new PayloadParser();
         _safety = safety ?? new LinkSafetyAnalyzer();
     }
@@ -33,29 +62,22 @@ public class QrDecoderService
 
         try
         {
-            var source = new BitmapLuminanceSource(bitmap);
-            var binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
-
             // Try single result first
-            try
+            var result = _reader.Decode(bitmap);
+            if (result != null)
             {
-                var result = _reader.decode(binaryBitmap);
-                results.Add(CreateQrResult(result, source));
+                results.Add(CreateQrResult(result));
             }
-            catch (ReaderException)
+            else
             {
                 // Single result failed, try multiple
-                try
+                var multiResults = _reader.DecodeMultiple(bitmap);
+                if (multiResults != null)
                 {
-                    var multiResults = _reader.decodeMultiple(binaryBitmap);
                     foreach (var r in multiResults)
                     {
-                        results.Add(CreateQrResult(r, source));
+                        results.Add(CreateQrResult(r));
                     }
-                }
-                catch (ReaderException)
-                {
-                    // No QR found
                 }
             }
         }
@@ -67,7 +89,6 @@ public class QrDecoderService
         // If cursor position given, pick the closest or containing QR
         if (results.Count > 1 && cursorX.HasValue && cursorY.HasValue)
         {
-            var cursor = (cursorX.Value, cursorY.Value);
             var containing = results.FirstOrDefault(r =>
                 r.BoundingBox != null && r.BoundingBox.Value.Contains(cursorX.Value, cursorY.Value));
 
@@ -92,7 +113,7 @@ public class QrDecoderService
         return results;
     }
 
-    private QrResult CreateQrResult(Result result, BitmapLuminanceSource source)
+    private QrResult CreateQrResult(Result result)
     {
         var payload = _parser.Parse(result.Text);
 
@@ -103,7 +124,7 @@ public class QrDecoderService
         }
 
         // Extract bounding box
-        Rectangle? bbox = null;
+        Models.Rectangle? bbox = null;
         if (result.ResultPoints != null && result.ResultPoints.Length >= 2)
         {
             bbox = ExtractBoundingBox(result.ResultPoints);
@@ -117,7 +138,7 @@ public class QrDecoderService
         };
     }
 
-    private static Rectangle ExtractBoundingBox(ResultPoint[] points)
+    private static Models.Rectangle ExtractBoundingBox(ResultPoint[] points)
     {
         if (points.Length == 0)
             return default;
@@ -127,12 +148,17 @@ public class QrDecoderService
         var minY = (int)points.Min(p => p.Y);
         var maxY = (int)points.Max(p => p.Y);
 
-        return new Rectangle
+        return new Models.Rectangle
         {
             X = minX,
             Y = minY,
             Width = maxX - minX + 1,
             Height = maxY - minY + 1
         };
+    }
+
+    public void Dispose()
+    {
+        // BarcodeReader doesn't need disposal, but keeping this for future cleanup if needed
     }
 }

@@ -24,8 +24,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-    <FrameworkReference Include="WindowsDesktop.App.WPF" />
-    <FrameworkReference Include="WindowsDesktop.App.WindowsForms" />
+    <PackageReference Include="System.Windows.Forms" Version="8.0.0" />
+    <PackageReference Include="WindowsBase" Version="8.0.0" />
+    <PackageReference Include="PresentationCore" Version="8.0.0" />
+    <PackageReference Include="PresentationFramework" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

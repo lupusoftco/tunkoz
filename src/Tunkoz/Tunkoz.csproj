@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,8 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF Condition="'$(OS)' == 'Windows_NT'">true</UseWPF>
+    <UseWindowsForms Condition="'$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    <!-- Allow compilation on Linux for syntax checking, but WPF won't run there -->
+    <DisableWindowsTargetingCheck>true</DisableWindowsTargetingCheck>
+    <!-- For Windows builds, ensure we target WindowsDesktop SDK features -->
+    <GenerateTargetFrameworkMonikerAttribute>false</GenerateTargetFrameworkMonikerAttribute>
     <AssemblyName>Tunkoz</AssemblyName>
     <RootNamespace>Tunkoz</RootNamespace>
     <Version>0.1.0</Version>

@@ -28,7 +28,20 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Run tests
-      run: dotnet test --no-build --verbosity normal --configuration Release
+      shell: pwsh
+      run: |
+        $out = dotnet test --no-build --configuration Release 2>&1
+        $code = $LASTEXITCODE
+        $out | Write-Output
+        if ($code -ne 0) {
+          # Surface failures as annotations so they're visible without downloading logs
+          $out | Select-String -Pattern '^\s*(Failed |Error Message:|Assert\.|Expected|Actual|.*Exception)' -Context 0,2 |
+            Select-Object -First 40 | ForEach-Object {
+              $msg = ($_.Line + ' ' + ($_.Context.PostContext -join ' ')).Trim() -replace '[\r\n]', ' '
+              Write-Output "::error::$msg"
+            }
+          exit $code
+        }
 
     - name: Publish self-contained executable
       run: dotnet publish src/Tunkoz/Tunkoz.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish

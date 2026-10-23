@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Test
+      run: dotnet test --configuration Release
+
+    - name: Publish single-file exe
+      shell: pwsh
+      run: |
+        $version = "${{ github.ref_name }}".TrimStart('v') -replace '-.*$', ''
+        dotnet publish src/Tunkoz/Tunkoz.csproj -c Release -r win-x64 --self-contained `
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:EnableCompressionInSingleFile=true -p:Version=$version -o publish
+        Compress-Archive -Path publish/Tunkoz.exe -DestinationPath "Tunkoz-${{ github.ref_name }}-win-x64.zip"
+        Copy-Item publish/Tunkoz.exe "Tunkoz-${{ github.ref_name }}-win-x64.exe"
+
+    - name: Create GitHub release
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $tag = "${{ github.ref_name }}"
+        $pre = if ($tag -match '-') { '--prerelease' } else { '' }
+        gh release create $tag "Tunkoz-$tag-win-x64.exe" "Tunkoz-$tag-win-x64.zip" `
+          --title "Tünköz $tag" --generate-notes $pre

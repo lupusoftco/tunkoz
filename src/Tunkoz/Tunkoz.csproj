@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,9 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <UseWPF Condition="'$(OS)' == 'Windows_NT'">true</UseWPF>
-    <UseWindowsForms Condition="'$(OS)' == 'Windows_NT'">true</UseWindowsForms>
-    <DisableWindowsTargetingCheck>true</DisableWindowsTargetingCheck>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Tunkoz</AssemblyName>
     <RootNamespace>Tunkoz</RootNamespace>
     <Version>0.1.0</Version>
@@ -21,13 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tunkoz.Core\Tunkoz.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-    <PackageReference Include="System.Windows.Forms" Version="8.0.0" />
-    <PackageReference Include="WindowsBase" Version="8.0.0" />
-    <PackageReference Include="PresentationCore" Version="8.0.0" />
-    <PackageReference Include="PresentationFramework" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

@@ -23,4 +23,9 @@
     <ProjectReference Include="..\Tunkoz.Core\Tunkoz.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <FrameworkReference Include="WindowsDesktop.App.WPF" />
+    <FrameworkReference Include="WindowsDesktop.App.WindowsForms" />
+  </ItemGroup>
+
 </Project>

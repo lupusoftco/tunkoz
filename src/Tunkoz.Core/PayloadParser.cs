@@ -45,7 +45,7 @@ public class PayloadParser
             return new Payload
             {
                 Type = PayloadType.Url,
-                Content = "http://" + raw,
+                Content = uri.AbsoluteUri,
                 Metadata = new Dictionary<string, string>
                 {
                     { "scheme", "http" },

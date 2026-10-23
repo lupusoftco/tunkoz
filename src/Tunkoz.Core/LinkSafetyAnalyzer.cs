@@ -51,7 +51,7 @@ public class LinkSafetyAnalyzer
         // Plain http warning
         var isSafe = scheme == "https";
         var severity = SafetySeverity.Safe;
-        var reasonKey = "";
+        string? reasonKey = null;
 
         if (!isSafe)
         {
